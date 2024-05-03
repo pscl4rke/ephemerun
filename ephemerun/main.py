@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 
-from typing import List, Optional
+from dataclasses import dataclass
+from typing import List, Optional, Protocol
 
 import logging
 LOG = logging.getLogger("ephemerun")
@@ -12,33 +13,43 @@ import subprocess
 import sys
 
 
+class Backend(Protocol):
+
+    def run_command(self, command: str) -> None:
+        ...
+
+    def set_workdir(self, workdir: Optional[str]) -> None:
+        ...
+
+
 class Shell:
 
-    def __init__(self, command):
+    def __init__(self, command: str) -> None:
         self.command = command
 
-    def apply(self, backend):
+    def apply(self, backend: Backend) -> None:
         backend.run_command(self.command)
 
 
 class Workdir:
 
-    def __init__(self, workdir):
+    def __init__(self, workdir: str) -> None:
         self.workdir = workdir
 
-    def apply(self, backend):
+    def apply(self, backend: Backend) -> None:
         backend.set_workdir(self.workdir)
 
 
+@dataclass
 class DockerBackend:
+    ctrname: str
+    # These might need overriding for some base images:
+    shell: str = "/bin/sh"
+    backgroundjob: str = "sleep 999999"
+    # These can be altered:
+    workdir: Optional[str] = None
 
-    def __init__(self, ctrname: str) -> None:
-        self.ctrname = ctrname
-        # These might need overriding for some base images:
-        self.shell = "/bin/sh"
-        self.backgroundjob = "sleep 999999"
-
-    def set_workdir(self, workdir: Optional[str]):
+    def set_workdir(self, workdir: Optional[str]) -> None:
         LOG.info("Workdir: %s" % workdir)
         self.workdir = workdir
 
@@ -73,6 +84,10 @@ class DockerBackend:
             "docker", "container", "kill", self.ctrname,
         ]
         subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
+
+
+def __mypy_ensure_DockerBackend_satisfies_Backend(x: DockerBackend) -> Backend:
+    return x
 
 
 def suggest_container_name() -> str:
