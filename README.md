@@ -50,6 +50,9 @@ Real-world example:
 
 ## Roadmap
 
+* The output would be easier to read if Epheruns's messages
+were coloured in.
+
 * Currently only Docker is available as a backend.
 It would be fairly easy to add Podman support.
 Perhaps Containerd too.
