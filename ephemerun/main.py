@@ -108,6 +108,7 @@ def parse_args(args: List[str]) -> argparse.Namespace:
 def main() -> None:
     logging.basicConfig(level="INFO", format="[ephemerun] %(message)s")
     options = parse_args(sys.argv[1:])
+    exitcode = 1
     ctrname = suggest_container_name()
     backend = DockerBackend(ctrname)
     try:
@@ -115,6 +116,7 @@ def main() -> None:
         for action in options.actions:
             action.apply(backend)
         LOG.info("All actions completed successfully")
+        exitcode = 0
     except KeyboardInterrupt:
         LOG.error("Interrupted")
     except subprocess.CalledProcessError as exc:
@@ -123,3 +125,4 @@ def main() -> None:
         LOG.error("Timeout: %s" % exc)
     finally:
         backend.tear_down()
+    sys.exit(exitcode)
