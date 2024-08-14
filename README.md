@@ -40,13 +40,22 @@ Real-world example:
 
     $ ephemerun \
         -i "python:3.9-slim-bullseye" \
-        -v ".:/root/src:ro" \
+        -v "$(pwd):/root/src:ro" \
         -W "/root" \
         -S "cp -air ./src/* ." \
         -S "pip --no-cache-dir install .[testing]" \
         -S "mypy --cache-dir /dev/null projectdir" \
         -S "coverage run -m unittest discover tests/" \
         -S "coverage report -m"
+
+## Quick Docs
+
+* Use `-i` to set the base image for the temporary container.
+* Use `-v` to mount a directory into it (where the `:ro` suffix
+makes it readonly).
+* Run `-W` to change the current working directory.
+* Run `-S` to execute a line in a shell.
+* And of course `-h` gives you usage info!
 
 ## Roadmap
 
