@@ -114,6 +114,8 @@ def parse_args(args: List[str]) -> argparse.Namespace:
 
 
 def get_backend(ctrname: str) -> Backend:
+    if exe := which("podman"):
+        return DockerPodmanBackend(exe, ctrname)
     if exe := which("docker"):
         return DockerPodmanBackend(exe, ctrname)
     raise Exception("No container mechanism found")
