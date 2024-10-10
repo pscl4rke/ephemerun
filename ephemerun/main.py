@@ -9,11 +9,18 @@ LOG = logging.getLogger("ephemerun")
 
 import argparse
 import random
+from shutil import which
 import subprocess
 import sys
 
 
 class Backend(Protocol):
+
+    def set_up(self, image: str, volumes: List[str]) -> None:
+        ...
+
+    def tear_down(self) -> None:
+        ...
 
     def run_command(self, command: str) -> None:
         ...
@@ -105,12 +112,19 @@ def parse_args(args: List[str]) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
+def get_backend(ctrname: str) -> Backend:
+    if exe := which("docker"):
+        LOG.info("Using %r", exe)
+        return DockerBackend(ctrname)
+    raise Exception("No container mechanism found")
+
+
 def main() -> None:
     logging.basicConfig(level="INFO", format="[ephemerun] %(message)s")
     options = parse_args(sys.argv[1:])
     exitcode = 1
     ctrname = suggest_container_name()
-    backend = DockerBackend(ctrname)
+    backend = get_backend(ctrname)
     try:
         backend.set_up(options.image, options.volumes)
         for action in options.actions:
