@@ -48,7 +48,8 @@ class Workdir:
 
 
 @dataclass
-class DockerBackend:
+class DockerPodmanBackend:
+    exe: str
     ctrname: str
     # These might need overriding for some base images:
     shell: str = "/bin/sh"
@@ -63,7 +64,7 @@ class DockerBackend:
     def set_up(self, image: str, volumes: List[str]) -> None:
         LOG.info("Starting: %s" % self.ctrname)
         args = [
-            "docker", "run",
+            self.exe, "run",
             "--rm",
             "--detach",
             "--name", self.ctrname,
@@ -79,7 +80,7 @@ class DockerBackend:
 
     def run_command(self, command: str) -> None:
         LOG.info("Run: %s" % command)
-        args = ["docker", "exec"]
+        args = [self.exe, "exec"]
         if self.workdir is not None:
             args.extend(["--workdir", self.workdir])
         args.extend([self.ctrname, self.shell, "-c", command])
@@ -88,12 +89,12 @@ class DockerBackend:
     def tear_down(self) -> None:
         LOG.info("Stopping: %s" % self.ctrname)
         args = [
-            "docker", "container", "kill", self.ctrname,
+            self.exe, "container", "kill", self.ctrname,
         ]
         subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
 
 
-def __mypy_ensure_DockerBackend_satisfies_Backend(x: DockerBackend) -> Backend:
+def __mypy_ensure_DockerPodmanBackend_is_Backend(x: DockerPodmanBackend) -> Backend:
     return x
 
 
@@ -114,8 +115,7 @@ def parse_args(args: List[str]) -> argparse.Namespace:
 
 def get_backend(ctrname: str) -> Backend:
     if exe := which("docker"):
-        LOG.info("Using %r", exe)
-        return DockerBackend(ctrname)
+        return DockerPodmanBackend(exe, ctrname)
     raise Exception("No container mechanism found")
 
 
