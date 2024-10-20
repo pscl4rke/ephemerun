@@ -1,7 +1,6 @@
 
-release: pyversion != python3 setup.py --version
-release: gitversion != git describe --tags
+pre-release-checks:
+	pyroma .
+
 release:
-	@echo 'Py version:  $(pyversion)'
-	@echo 'Git version: $(gitversion)'
-	test '$(pyversion)' = '$(gitversion)'
+	test '$(shell python3 setup.py --version)' = '$(shell git describe --tags)'
