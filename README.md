@@ -18,6 +18,8 @@ There is no good way to define a teardown recipe in a Makefile,
 so if you spin up a container and one of your actions fails
 `make` will stop and leave your "temporary" container permanently
 floating around.
+But Ephemerun will always tidy up after itself so can be safely called
+from a Makefile.
 
 ## Installation
 
@@ -62,10 +64,11 @@ makes it readonly).
 * The output would be easier to read if Epheruns's messages
 were coloured in.
 
-* Currently only Docker is available as a backend.
-It would be fairly easy to add Podman support.
-Perhaps Containerd too.
-I would like to support other mechanisms too
+* Currently only Docker and Podman are available as backends
+and ephemerun autodetects which one is installed.
+Perhaps Containerd or something using a Kubernetes cluster
+could be added without too much difficulty.
+I would like to support many other mechanisms too
 (e.g. Systemd Nspawn)
 but currently everything assumes the image is specified
 in OCI format.
@@ -81,6 +84,11 @@ same time.
 * Many tools can make use of a cache,
 but anything that gets cached is thrown away by Ephemerun.
 I do not have a strategy for handling that at the moment.
+
+* More generally we could do with developing and documenting a strategy
+for one Makefile recipe to build a reusable image
+and then different recipes using it for different purposes.
+Presumably ephemerun wouldn't be used for the building.
 
 ## Licence
 
