@@ -28,6 +28,9 @@ class Backend(Protocol):
     def set_workdir(self, workdir: Optional[str]) -> None:
         ...
 
+    def download(self, path_on_container: str, path_locally: str) -> None:
+        ...
+
 
 class Shell:
 
@@ -45,6 +48,19 @@ class Workdir:
 
     def apply(self, backend: Backend) -> None:
         backend.set_workdir(self.workdir)
+
+
+class Download:
+
+    def __init__(self, filename: str) -> None:
+        if ":" in filename:
+            self.srcfile, self.destfile = filename.split(":", 1)
+        else:
+            self.srcfile = filename
+            self.destfile = filename
+
+    def apply(self, backend: Backend) -> None:
+        backend.download(self.srcfile, self.destfile)
 
 
 @dataclass
@@ -86,6 +102,14 @@ class DockerPodmanBackend:
         args.extend([self.ctrname, self.shell, "-c", command])
         subprocess.run(args, check=True)
 
+    def download(self, path_on_container: str, path_locally: str) -> None:
+        LOG.info("Download %r to %r" % (path_on_container, path_locally))
+        src = "%s:%s/%s" % (self.ctrname, self.workdir, path_on_container)
+        dest = path_locally
+        args = [self.exe, "container", "cp", "--archive", src, dest]
+        # FIXME check ownership afterwards! Fine with podman, may not be with docker!
+        subprocess.run(args, check=True)
+
     def tear_down(self) -> None:
         LOG.info("Stopping: %s" % self.ctrname)
         args = [
@@ -110,6 +134,7 @@ def parse_args(args: List[str]) -> argparse.Namespace:
     parser.add_argument("-v", "--volume", action="append", dest="volumes")
     parser.add_argument("-W", "--workdir", action="append", dest="actions", type=Workdir)
     parser.add_argument("-S", "--shellcmd", action="append", dest="actions", type=Shell)
+    parser.add_argument("-D", "--download", action="append", dest="actions", type=Download)
     return parser.parse_args(args)
 
 

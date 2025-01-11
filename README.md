@@ -38,7 +38,7 @@ Silly demo:
         -W /tmp \
         -S pwd
 
-Real-world example:
+Real-world example of running tests:
 
     $ ephemerun \
         -i "python:3.9-slim-bullseye" \
@@ -50,6 +50,16 @@ Real-world example:
         -S "coverage run -m unittest discover tests/" \
         -S "coverage report -m"
 
+Real-world example of building an artefact:
+
+    $ ephemerun \
+        -i "docker.io/library/golang:1.23" \
+        -v "$(pwd):/root/src:ro" \
+        -W "/root" \
+        -S "cp -air ./src/* ." \
+        -S "go build hello.go" \
+        -D hello
+
 ## Quick Docs
 
 * Use `-i` to set the base image for the temporary container.
@@ -57,6 +67,8 @@ Real-world example:
 makes it readonly).
 * Run `-W` to change the current working directory.
 * Run `-S` to execute a line in a shell.
+* Run `-D` to download a file out of the container (with
+a `:destname` suffix if you want a different name).
 * And of course `-h` gives you usage info!
 
 ## Roadmap
@@ -73,13 +85,19 @@ I would like to support many other mechanisms too
 but currently everything assumes the image is specified
 in OCI format.
 
-* Currently the only useful thing you can do is run shell commands
-with `-S` and capture the stdout/stderr output.
-I would like to add a "download" mechanism,
-so artefacts can be built in a container and then copied out
-to the host.
-Presumably an "upload" mechanism would be easy to add at the
-same time.
+* It would be good to mirror `-D` with an inverse `-U`
+to do an upload.
+
+* I *think* if `-D` is used with the docker backend the files
+will end up being owned by a different user from the one running
+ephemerun.
+I think that is undesirable.
+
+* As the examples show there is an icky problem where the current
+directory is mounted readonly,
+but then build commands etc fail,
+so we have to mount it to a `src/` subdirectory and copy the files out.
+Surely there is a better way.
 
 * Many tools can make use of a cache,
 but anything that gets cached is thrown away by Ephemerun.
