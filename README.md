@@ -11,7 +11,8 @@ It is a good way to run a test suite.
 It is particularly good at running the tests multiple times using
 slightly different base images
 (e.g. to ensure compatibility with multiple platform versions).
-In the future it might be good for building artefacts too.
+It also has support for building artefacts in a container and
+downloading them out to the host system.
 
 It is especially helpful when combined with `make`.
 There is no good way to define a teardown recipe in a Makefile,
@@ -23,8 +24,11 @@ from a Makefile.
 
 ## Installation
 
-This codebase is not (currently) on PyPI,
-but can be installed with pip straight from the Git source:
+This codebase is available  on PyPI:
+
+    $ pip install ephemerun
+
+but can also be installed straight from the Git source:
 
     $ pip install git+https://github.com/pscl4rke/ephemerun.git
 
@@ -59,6 +63,7 @@ Real-world example of building an artefact:
         -S "cp -air ./src/* ." \
         -S "go build hello.go" \
         -D hello
+    $ ./hello
 
 ## Quick Docs
 
