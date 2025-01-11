@@ -140,5 +140,8 @@ def main() -> None:
     except subprocess.TimeoutExpired as exc:
         LOG.error("Timeout: %s" % exc)
     finally:
-        backend.tear_down()
+        try:
+            backend.tear_down()
+        except subprocess.CalledProcessError:
+            LOG.error("Container teardown failed")
     sys.exit(exitcode)
