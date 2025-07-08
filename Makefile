@@ -1,9 +1,12 @@
 
+libdir := ephemerun
+
 venv.testing:
 	python3 -m venv $@
 	$@/bin/pip install -e '.[testing]'
 
 pre-release-checks: | venv.testing
+	venv.testing/bin/mypy $(libdir)
 	venv.testing/bin/pyroma .
 
 release: export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
