@@ -11,7 +11,7 @@ pre-release-checks: | venv.testing
 
 release: export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
 release:
-	test '$(shell python3 setup.py --version)' = '$(shell git describe --tags)'
+	test '$(shell python3 setup.py --version)' = '$(shell git describe)'
 	test ! -d dist
 	python3 setup.py sdist bdist_wheel
 	check-wheel-contents dist
