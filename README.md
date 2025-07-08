@@ -103,6 +103,7 @@ directory is mounted readonly,
 but then build commands etc fail,
 so we have to mount it to a `src/` subdirectory and copy the files out.
 Surely there is a better way.
+Presumably if `-U` can recursively upload a directory then we can use that.
 
 * Many tools can make use of a cache,
 but anything that gets cached is thrown away by Ephemerun.
